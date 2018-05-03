@@ -1,0 +1,89 @@
+import numpy as np
+import torch
+from torch import nn
+
+from src import CONFIG
+
+
+class BaseModel(nn.Module):
+
+    def __init__(self, batch_size=1):
+
+        super().__init__()
+
+        self._setup()
+
+        self.data_gen = self.get_data_gen(batch_size)
+        self.criterion = self.get_criterion()
+
+        self.params = list(self.parameters())
+        self.optimizer = CONFIG.optimizer_closure_model(self.params)
+        self.n_params = sum(np.prod(p.shape) for p in self.params)
+
+    def forward(self, x):
+
+        raise NotImplementedError
+
+    def _setup(self):
+
+        raise NotImplementedError
+
+    def get_data_gen(self, batch_size):
+
+        raise NotImplementedError
+
+    def get_criterion(self):
+
+        raise NotImplementedError
+
+    def step(self, calc_deltas=True, update_params=True):
+
+        grads = []
+        deltas_opt = []
+        losses = []
+
+        for t in range(CONFIG.num_steps_model):
+            inp, targets = next(self.data_gen)
+
+            if isinstance(inp, np.ndarray):
+                inp = torch.from_numpy(inp).float()
+            if isinstance(targets, np.ndarray):
+                targets = torch.from_numpy(targets).float()
+
+            out = self(inp)
+
+            loss = self.criterion(out, targets)
+
+            losses.append(loss)
+
+            self.zero_grad()
+            loss.backward()
+
+            grads.append([p.grad.clone() for p in self.params])
+
+            if calc_deltas:
+                params0 = [p.clone() for p in self.params]
+
+                self.optimizer.step()
+                deltas_opt.append([p1 - p0 for (p1, p0) in zip(self.params, params0)])
+
+                if not update_params:
+                    for (p1, p0) in zip(self.params, params0):
+                        p1.data = p0.data
+
+        grads = self._proc_deltas(grads)
+        deltas_opt = self._proc_deltas(deltas_opt)
+
+        return grads, deltas_opt, losses
+
+    def _proc_deltas(self, l, transpose=True, trailing_dim=True):
+
+        res = torch.stack([torch.cat([x.reshape(-1) for x in sl]) for sl in l])
+
+        if transpose:
+            res = res.transpose(1, 0)
+
+        if trailing_dim:
+            res = res[:, :, None]
+
+        return res
