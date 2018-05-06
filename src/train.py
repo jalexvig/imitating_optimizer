@@ -53,15 +53,18 @@ class MetaOptimizer(nn.Module):
 
             deltas_pred, _ = self(grads)
 
-            loss = (deltas_opt - deltas_pred).norm()
+            # loss = (deltas_opt - deltas_pred).norm()
+
+            STABILITY = 1e-8
+            perc_error = (deltas_opt - deltas_pred) / (deltas_opt + STABILITY)
+            loss = perc_error.norm()
 
             if i % 20 == 0:
-                STABILITY = 1e-8
                 from scipy.stats import describe
-                perc_error = (deltas_opt - deltas_pred) / (deltas_opt + STABILITY)
                 print(describe(perc_error.abs().data.numpy(), axis=None))
-                # print(describe(deltas_opt.abs().data.numpy(), axis=None))
-                # print(describe(deltas_pred.abs().data.numpy(), axis=None))
+                print(describe(grads.data.numpy(), axis=None))
+                print(describe(deltas_opt.data.numpy(), axis=None))
+                print(describe(deltas_pred.data.numpy(), axis=None))
                 print(i, loss.item())
 
             model.zero_grad()
