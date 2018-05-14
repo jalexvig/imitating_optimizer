@@ -1,10 +1,13 @@
 import itertools
-
 import os
+
 import torch
+from scipy.stats import describe
 from torch import nn
 
 from src import CONFIG
+
+STABILITY = 1e-8
 
 
 class MetaOptimizer(nn.Module):
@@ -55,17 +58,15 @@ class MetaOptimizer(nn.Module):
 
             # loss = (deltas_opt - deltas_pred).norm()
 
-            STABILITY = 1e-8
             perc_error = (deltas_opt - deltas_pred) / (deltas_opt + STABILITY)
             loss = perc_error.norm()
 
-            if i % 20 == 0:
-                from scipy.stats import describe
+            if i % 100 == 0:
+                print(i, loss.item())
                 print(describe(perc_error.abs().data.numpy(), axis=None))
                 print(describe(grads.data.numpy(), axis=None))
                 print(describe(deltas_opt.data.numpy(), axis=None))
                 print(describe(deltas_pred.data.numpy(), axis=None))
-                print(i, loss.item())
 
             model.zero_grad()
             self.zero_grad()

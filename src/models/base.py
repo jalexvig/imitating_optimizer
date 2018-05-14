@@ -76,7 +76,20 @@ class BaseModel(nn.Module):
 
         return grads, deltas_opt, losses
 
-    def _proc_deltas(self, l, transpose=True, trailing_dim=True):
+    def _proc_deltas(self,
+                     l: list,
+                     transpose: bool=True,
+                     trailing_dim: bool=True):
+        """
+        Transform time index list of potentially disparate data.
+        Args:
+            l: A list of values for each timestep (4-D).
+            transpose: Make features the first axis, time the second axis.
+            trailing_dim: Add an axis to the result.
+
+        Returns:
+
+        """
 
         res = torch.stack([torch.cat([x.reshape(-1) for x in sl]) for sl in l])
 
