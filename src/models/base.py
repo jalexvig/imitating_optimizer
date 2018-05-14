@@ -13,7 +13,7 @@ class BaseModel(nn.Module):
 
         self._setup()
 
-        self.data_gen = self.get_data_gen(batch_size)
+        self.data_gen_train = self.get_data_gen(batch_size, train=True)
         self.criterion = self.get_criterion()
 
         self.params = list(self.parameters())
@@ -28,7 +28,7 @@ class BaseModel(nn.Module):
 
         raise NotImplementedError
 
-    def get_data_gen(self, batch_size):
+    def get_data_gen(self, batch_size, train=True):
 
         raise NotImplementedError
 
@@ -43,7 +43,7 @@ class BaseModel(nn.Module):
         losses = []
 
         for t in range(CONFIG.num_steps_model):
-            inp, targets = next(self.data_gen)
+            inp, targets = next(self.data_gen_train)
 
             if isinstance(inp, np.ndarray):
                 inp = torch.from_numpy(inp).float()
@@ -75,6 +75,19 @@ class BaseModel(nn.Module):
         deltas_opt = self._proc_deltas(deltas_opt)
 
         return grads, deltas_opt, losses
+
+    def evaluate(self, batch_size):
+
+        if not hasattr(self, 'data_gen_eval'):
+            self.data_gen_eval = self.get_data_gen(batch_size, train=False)
+
+        inp, targets = next(self.data_gen_eval)
+
+        out = self(inp)
+
+        loss = self.criterion(out, targets)
+
+        return loss
 
     def _proc_deltas(self,
                      l: list,

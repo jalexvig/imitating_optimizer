@@ -31,10 +31,10 @@ class MNIST(BaseModel):
 
         return nn.CrossEntropyLoss()
 
-    def get_data_gen(self, batch_size):
+    def get_data_gen(self, batch_size, train=True):
 
         train_loader = torch.utils.data.DataLoader(
-            datasets.MNIST('./data', train=True, download=True,
+            datasets.MNIST('./data', train=train, download=True,
                            transform=transforms.Compose([
                                transforms.ToTensor(),
                                transforms.Normalize((0.1307,), (0.3081,))

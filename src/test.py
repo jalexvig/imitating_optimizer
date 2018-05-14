@@ -23,6 +23,9 @@ def test():
 
     for i in itertools.count():
 
+        if i == 0:
+            break
+
         grads, deltas_opt, losses = model.step(update_params=update_params)
 
         deltas_pred, state = meta_learner(grads, state)
@@ -54,8 +57,11 @@ def test():
         j = 0
         for param in model.params:
             size = np.prod(param.shape)
-            # deltas_pred = grads.view(-1) * -0.01
+            # delta = -0.01 * grads[j: j + size].reshape(param.shape)
             delta = deltas_pred[j: j + size].reshape(param.shape)
             delta -= WEIGHT_DECAY * params[j: j + size].reshape(param.shape)
             param.data.add_(delta)
             j += size
+
+    for i in range(4):
+        print(model.evaluate(64))

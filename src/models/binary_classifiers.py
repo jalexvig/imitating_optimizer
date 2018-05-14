@@ -20,7 +20,7 @@ class BinaryClassifierModel(BaseModel):
         self.fc1 = nn.Linear(2, 4)
         self.fc2 = nn.Linear(4, 1)
 
-    def get_data_gen(self, batch_size):
+    def get_data_gen(self, batch_size, train=True):
 
         while 1:
 
