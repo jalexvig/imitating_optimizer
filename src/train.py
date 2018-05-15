@@ -18,7 +18,7 @@ class MetaOptimizer(nn.Module):
 
         self.rnn = nn.LSTM(
             input_size=1,
-            hidden_size=1,
+            hidden_size=2,
             batch_first=True
         )
 
@@ -32,10 +32,18 @@ class MetaOptimizer(nn.Module):
 
     def forward(self, x, state=None):
 
-        o, state = self.rnn(x, state)
+        # gates bounded by -1, 1
+        gates, state = self.rnn(x, state)
 
-        # Since o bounded by -1, 1
-        res = x * o
+        results = [torch.zeros([x.shape[0], x.shape[-1]])]
+
+        x_contrib = x * gates[:, :, :1]
+
+        for i in range(x.shape[1]):
+            last_contrib = results[-1] * gates[:, i, 1:]
+            results.append(x_contrib[:, i, :] + last_contrib)
+
+        res = torch.stack(results[1:], dim=1)
 
         return res, state
 
@@ -43,16 +51,17 @@ class MetaOptimizer(nn.Module):
 
         for i in itertools.count():
 
-            if i % CONFIG.save_freq == 0 and i:
+            if i % CONFIG.freq_save == 0 and i:
                 torch.save(self.state_dict(), CONFIG.fpath_checkpoint)
                 print('Saved at ', i)
 
-            if i == CONFIG.num_steps_meta and CONFIG.num_steps_meta:
+            if CONFIG.num_steps_meta and i == CONFIG.num_steps_meta:
                 break
 
+            # This will reinitialize model params
             model = CONFIG.model_class()
 
-            grads, deltas_opt, losses = model.step()
+            grads, deltas_opt, model_losses = model.step()
 
             deltas_pred, _ = self(grads)
 
@@ -61,8 +70,9 @@ class MetaOptimizer(nn.Module):
             perc_error = (deltas_opt - deltas_pred) / (deltas_opt + STABILITY)
             loss = perc_error.norm()
 
-            if i % 100 == 0:
-                print(i, loss.item())
+            if CONFIG.freq_debug and i % CONFIG.freq_debug == 0:
+                # Note: model losses will be bad since we are reinitializing model every iteration
+                print(i, model_losses[0].item(), model_losses[-1].item(), loss.item())
                 print(describe(perc_error.abs().data.numpy(), axis=None))
                 print(describe(grads.data.numpy(), axis=None))
                 print(describe(deltas_opt.data.numpy(), axis=None))

@@ -27,11 +27,12 @@ def parse_flags():
                         help='Comma separated kwargs for meta-model optimizer. Keys and values are separated by a colon. E.g. lr:0.01,alpha:0.2')
     parser.add_argument('--num_steps_model', default=50, type=int, help='Number of steps to run model.')
     parser.add_argument('--num_steps_meta', default=300, type=int, help='Number of steps to run meta-model.')
-    parser.add_argument('--save_freq', default=100, type=int, help='Number of steps to save learner after.')
     parser.add_argument('--reset', action='store_true',
                         help='If set, delete the existing model directory and start training from scratch.')
     parser.add_argument('--run_name', default='default', help='Name of run.')
     parser.add_argument('--test', help='Dir path for trained model/config file. THIS OVERRIDES OTHER OPTIONS.')
+    parser.add_argument('--freq_save', default=1000, type=int, help='Number of meta steps before saving learner.')
+    parser.add_argument('--freq_debug', type=int, help='Number of meta steps before outputtig diagnostic info.')
 
     parser.parse_args(namespace=CONFIG)
 
@@ -62,6 +63,7 @@ def proc_flags():
             shutil.rmtree(CONFIG.dpath_model, ignore_errors=True)
 
         CONFIG.fpath_checkpoint = os.path.join(CONFIG.dpath_model, 'checkpoint')
+        CONFIG.fpath_eval_data = os.path.join(CONFIG.dpath_model, 'eval_data.pkl')
 
         if not os.path.exists(CONFIG.dpath_model):
             os.makedirs(CONFIG.dpath_model)

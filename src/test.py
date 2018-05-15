@@ -23,10 +23,10 @@ def test():
 
     for i in itertools.count():
 
-        if i == 0:
+        if i == 4000:
             break
 
-        grads, deltas_opt, losses = model.step(update_params=update_params)
+        grads, deltas_opt, model_losses = model.step(update_params=update_params)
 
         deltas_pred, state = meta_learner(grads, state)
 
@@ -46,7 +46,7 @@ def test():
             params_stats = describe(params.abs().data.numpy(), axis=None)
             print(i,
                   l.item(),
-                  losses[0].item(),
+                  model_losses[0].item(),
                   (stats.minmax, stats.mean, stats.variance),
                   (params_stats.minmax, params_stats.mean, params_stats.variance),
                   )
