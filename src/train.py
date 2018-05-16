@@ -30,20 +30,29 @@ class MetaOptimizer(nn.Module):
             print('Loading previous model')
             self.load_state_dict(torch.load(CONFIG.fpath_checkpoint))
 
-    def forward(self, x, state=None):
+    def forward(self, x, state=None, truth=None):
 
         # gates bounded by -1, 1
         gates, state = self.rnn(x, state)
 
-        results = [torch.zeros([x.shape[0], x.shape[-1]])]
-
         x_contrib = x * gates[:, :, :1]
 
-        for i in range(x.shape[1]):
-            last_contrib = results[-1] * gates[:, i, 1:]
-            results.append(x_contrib[:, i, :] + last_contrib)
+        if truth is None:
 
-        res = torch.stack(results[1:], dim=1)
+            results = [torch.zeros([x.shape[0], x.shape[-1]])]
+
+            for i in range(x.shape[1]):
+                last_contrib = results[-1] * gates[:, i, 1:]
+                results.append(x_contrib[:, i, :] + last_contrib)
+
+            res = torch.stack(results[1:], dim=1)
+        else:
+
+            last = torch.cat([torch.zeros([truth.shape[0], 1, 1]), truth[:, :-1, :]], dim=1)
+
+            last_contrib = last * gates[:, :, :1]
+
+            res = x_contrib + last_contrib
 
         return res, state
 
@@ -63,7 +72,8 @@ class MetaOptimizer(nn.Module):
 
             grads, deltas_opt, model_losses = model.step()
 
-            deltas_pred, _ = self(grads)
+            truth = deltas_opt if CONFIG.supply_truth else None
+            deltas_pred, _ = self(grads, truth=truth)
 
             # loss = (deltas_opt - deltas_pred).norm()
 

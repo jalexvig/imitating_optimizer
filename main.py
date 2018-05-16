@@ -29,6 +29,7 @@ def parse_flags():
     parser.add_argument('--num_steps_meta', default=300, type=int, help='Number of steps to run meta-model.')
     parser.add_argument('--reset', action='store_true',
                         help='If set, delete the existing model directory and start training from scratch.')
+    parser.add_argument('--supply_truth', action='store_true', help='Supply optimizer deltas to meta-optimizer.')
     parser.add_argument('--run_name', default='default', help='Name of run.')
     parser.add_argument('--test', help='Dir path for trained model/config file. THIS OVERRIDES OTHER OPTIONS.')
     parser.add_argument('--freq_save', default=1000, type=int, help='Number of meta steps before saving learner.')
