@@ -39,7 +39,7 @@ class BaseModel(nn.Module):
     def step(self, calc_deltas=True, update_params=True):
 
         grads = []
-        deltas_opt = []
+        deltas = []
         losses = []
 
         for t in range(CONFIG.num_steps_model):
@@ -65,16 +65,16 @@ class BaseModel(nn.Module):
                 params0 = [p.clone() for p in self.params]
 
                 self.optimizer.step()
-                deltas_opt.append([p1 - p0 for (p1, p0) in zip(self.params, params0)])
+                deltas.append([p1 - p0 for (p1, p0) in zip(self.params, params0)])
 
                 if not update_params:
                     for (p1, p0) in zip(self.params, params0):
                         p1.data = p0.data
 
         grads = self._proc_deltas(grads)
-        deltas_opt = self._proc_deltas(deltas_opt)
+        deltas = self._proc_deltas(deltas)
 
-        return grads, deltas_opt, losses
+        return grads, deltas, losses
 
     def evaluate(self, batch_size, reset=True):
 

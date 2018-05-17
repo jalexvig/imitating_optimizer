@@ -88,7 +88,6 @@ class MetaOptimizer(nn.Module):
                 print(describe(deltas_opt.data.numpy(), axis=None))
                 print(describe(deltas_pred.data.numpy(), axis=None))
 
-            model.zero_grad()
             self.zero_grad()
             loss.backward()
 
