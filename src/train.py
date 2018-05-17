@@ -18,9 +18,13 @@ class MetaOptimizer(nn.Module):
 
         self.rnn = nn.LSTM(
             input_size=1,
-            hidden_size=2,
+            hidden_size=3,
             batch_first=True
         )
+
+        self.fc1 = torch.nn.Linear(3, 1)
+
+        self.stds = torch.exp(torch.zeros(1))
 
         self.params = list(self.parameters())
 
@@ -31,6 +35,16 @@ class MetaOptimizer(nn.Module):
             self.load_state_dict(torch.load(CONFIG.fpath_checkpoint))
 
     def forward(self, x, state=None, truth=None):
+
+        h1, state = self.rnn(x, state)
+
+        means = self.fc1(h1)
+
+        out = means + torch.randn(x.shape) * self.stds
+
+        return out, state
+
+    def forward_old(self, x, state=None, truth=None):
 
         # gates bounded by -1, 1
         gates, state = self.rnn(x, state)
