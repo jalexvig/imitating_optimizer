@@ -21,7 +21,11 @@ def test():
 
     state = None
 
+    results = []
+
     for i in itertools.count():
+
+        results.append(model.evaluate(64).item())
 
         if i == 4000:
             break
@@ -63,5 +67,22 @@ def test():
             param.data.add_(delta)
             j += size
 
-    for i in range(4):
-        print(model.evaluate(64))
+    return results
+
+
+def graph(results, title=''):
+
+    import seaborn as sns
+    from matplotlib import pyplot as plt
+    from scipy.signal import savgol_filter
+
+    sns.tsplot(savgol_filter(results, 31, 2), color=sns.xkcd_rgb['pale red'])
+    plt.scatter(np.arange(len(results)), results, s=2)
+
+    plt.xlabel('Iteration')
+    plt.ylabel('Model Loss')
+
+    if title:
+        plt.title(title)
+
+    plt.show()

@@ -76,9 +76,9 @@ class BaseModel(nn.Module):
 
         return grads, deltas_opt, losses
 
-    def evaluate(self, batch_size):
+    def evaluate(self, batch_size, reset=True):
 
-        if not hasattr(self, 'data_gen_eval'):
+        if not hasattr(self, 'data_gen_eval') or reset:
             self.data_gen_eval = self.get_data_gen(batch_size, train=False)
 
         inp, targets = next(self.data_gen_eval)

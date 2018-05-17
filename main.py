@@ -113,9 +113,10 @@ if __name__ == '__main__':
     proc_flags()
 
     if CONFIG.test:
-        from src.test import test
+        from src.test import test, graph
         CONFIG.num_steps_model = 1
-        test()
+        results = test()
+        graph(results)
     else:
         meta_learner = train.MetaOptimizer()
         meta_learner.run()
