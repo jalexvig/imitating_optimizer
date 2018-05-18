@@ -24,7 +24,7 @@ class MetaOptimizer(nn.Module):
 
         self.fc1 = torch.nn.Linear(3, 1)
 
-        self.stds = torch.exp(torch.zeros(1, requires_grad=True))
+        self.log_stds = torch.nn.Parameter(torch.zeros(1))
 
         self.params = list(self.parameters())
 
@@ -40,7 +40,7 @@ class MetaOptimizer(nn.Module):
 
         means = self.fc1(h1)
 
-        out = means + torch.randn(x.shape) * self.stds
+        out = means + torch.randn(x.shape) * torch.exp(self.log_stds)
 
         return out, state
 
