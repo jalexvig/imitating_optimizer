@@ -1,4 +1,4 @@
-import numpy as np
+import torch
 from torch import nn
 
 from src.models.base import BaseModel
@@ -24,8 +24,8 @@ class BinaryClassifierModel(BaseModel):
 
         while 1:
 
-            data = np.random.rand(batch_size, 2) * 5
-            labels = (data.sum(axis=1) > 5).astype(int)
+            data = torch.rand(batch_size, 2) * 5
+            labels = (data.sum(dim=1) > 5).to(torch.float32)
 
             yield data, labels
 

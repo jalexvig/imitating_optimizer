@@ -1,3 +1,4 @@
+import os
 import torch
 from torch import nn
 from torch.nn import functional as F
@@ -33,8 +34,15 @@ class MNIST(BaseModel):
 
     def get_data_gen(self, batch_size, train=True):
 
+        dpath_data = os.path.join(
+            os.path.dirname(__file__),
+            '..',
+            '..',
+            'data'
+        )
+
         train_loader = torch.utils.data.DataLoader(
-            datasets.MNIST('./data', train=train, download=True,
+            datasets.MNIST(dpath_data, train=train, download=True,
                            transform=transforms.Compose([
                                transforms.ToTensor(),
                                transforms.Normalize((0.1307,), (0.3081,))

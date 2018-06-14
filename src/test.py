@@ -38,14 +38,14 @@ def test():
 
         l = (deltas_opt - deltas_pred).norm()
 
-        perc_diff = (deltas_opt - deltas_pred) / (deltas_opt + 1e-8)
-
         if torch.isnan(l).any():
             params_stats = describe(params.abs().data.numpy(), axis=None)
             print(i, params_stats)
             import ipdb; ipdb.set_trace()
 
         if i % 100 == 0:
+            perc_diff = (deltas_opt - deltas_pred) / (deltas_opt + 1e-8)
+
             stats = describe(perc_diff.abs().data.numpy(), axis=None)
             params_stats = describe(params.abs().data.numpy(), axis=None)
             print(i,
@@ -86,3 +86,14 @@ def graph(results, title=''):
         plt.title(title)
 
     plt.show()
+
+
+if __name__ == '__main__':
+
+    from main import proc_flags
+    CONFIG.test = '/Users/alex/ml/lstm_learn_optimizer/saved/multivargauss_binary_adam_sgd_1/config.txt'
+    proc_flags()
+    CONFIG.num_steps_model = 1
+
+    results = test()
+    graph(results, 'multivariate gaussian binary classifier')
