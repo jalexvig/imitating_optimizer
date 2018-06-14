@@ -24,7 +24,7 @@ class MetaOptimizer(nn.Module):
 
         self.fc1 = torch.nn.Linear(3, 1)
 
-        self.log_stds = torch.nn.Parameter(torch.zeros(1))
+        self.log_stds = torch.nn.Parameter(torch.tensor(-20.0))
 
         self.params = list(self.parameters())
 
@@ -97,6 +97,7 @@ class MetaOptimizer(nn.Module):
             if CONFIG.freq_debug and i % CONFIG.freq_debug == 0:
                 # Note: model losses will be bad since we are reinitializing model every iteration
                 print(i, model_losses[0].item(), model_losses[-1].item(), loss.item())
+                print(self.log_stds)
                 print(describe(perc_error.abs().data.numpy(), axis=None))
                 print(describe(grads.data.numpy(), axis=None))
                 print(describe(deltas_opt.data.numpy(), axis=None))
