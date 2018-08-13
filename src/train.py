@@ -89,21 +89,25 @@ class MetaOptimizer(nn.Module):
             truth = deltas_opt if CONFIG.supply_truth else None
             deltas_pred, _ = self(grads, truth=truth)
 
-            # loss = (deltas_opt - deltas_pred).norm()
+            loss = (deltas_opt - deltas_pred).norm()
 
-            perc_error = (deltas_opt - deltas_pred) / (deltas_opt + STABILITY)
-            loss = perc_error.norm()
+            # perc_error = (deltas_opt - deltas_pred) / (deltas_opt + STABILITY)
+            # loss = perc_error.norm()
 
             if CONFIG.freq_debug and i % CONFIG.freq_debug == 0:
                 # Note: model losses will be bad since we are reinitializing model every iteration
-                print(i, model_losses[0].item(), model_losses[-1].item(), loss.item())
-                print(self.log_stds)
-                print(describe(perc_error.abs().data.numpy(), axis=None))
-                print(describe(grads.data.numpy(), axis=None))
-                print(describe(deltas_opt.data.numpy(), axis=None))
-                print(describe(deltas_pred.data.numpy(), axis=None))
+                print(i, self.log_stds.item(), model_losses[0].item(), model_losses[-1].item(), loss.item())
+                # describe_torch(perc_error.abs())
+                # describe_torch(grads)
+                # describe_torch(deltas_opt)
+                # describe_torch(deltas_pred)
 
             self.zero_grad()
             loss.backward()
 
             self.optimizer.step()
+
+
+def describe_torch(t, axis=None):
+
+    print(describe(t.data.numpy(), axis=axis))
