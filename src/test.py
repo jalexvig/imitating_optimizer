@@ -8,10 +8,8 @@ import numpy as np
 from src import CONFIG
 from src.train import MetaOptimizer
 
-WEIGHT_DECAY = 1e-3
 
-
-def test():
+def test(num_steps=0):
 
     update_params = False
 
@@ -27,10 +25,12 @@ def test():
 
         results.append(model.evaluate(64).item())
 
-        if i == 4000:
+        if i == num_steps and i:
             break
 
         grads, deltas_opt, model_losses = model.step(update_params=update_params)
+
+        print(grads.shape); exit()
 
         deltas_pred, state = meta_learner(grads, state)
 
@@ -54,18 +54,6 @@ def test():
                   (stats.minmax, stats.mean, stats.variance),
                   (params_stats.minmax, params_stats.mean, params_stats.variance),
                   )
-
-        if update_params:
-            continue
-
-        j = 0
-        for param in model.params:
-            size = np.prod(param.shape)
-            # delta = -0.01 * grads[j: j + size].reshape(param.shape)
-            delta = deltas_pred[j: j + size].reshape(param.shape)
-            delta -= WEIGHT_DECAY * params[j: j + size].reshape(param.shape)
-            param.data.add_(delta)
-            j += size
 
     return results
 
@@ -91,9 +79,9 @@ def graph(results, title=''):
 if __name__ == '__main__':
 
     from main import proc_flags
-    CONFIG.test = '/Users/alex/ml/lstm_learn_optimizer/saved/multivargauss_binary_adam_sgd_1/config.txt'
+    CONFIG.test = '/home/alex/me/ml/lstm_learn_optimizer/saved/default_mnist_adam_sgd_0/config.txt'
     proc_flags()
     CONFIG.num_steps_model = 1
 
-    results = test()
+    results = test(50)
     graph(results, 'multivariate gaussian binary classifier')
