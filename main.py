@@ -17,7 +17,7 @@ def parse_flags():
     parser.add_argument('--model', default='mnist', choices=['binary', 'mnist'], help='Name of model.')
     parser.add_argument('--model_dir', default='./saved', help='Directory to save run information in.')
     parser.add_argument('--seed', default=0, type=int, help='Random seed.')
-    parser.add_argument('--optimizer_model', choices=['sgd', 'adadelta', 'adam'], default='adam',
+    parser.add_argument('--optimizer_model', choices=['sgd', 'adadelta', 'adam'], default='sgd',
                         help='Number of steps to run model')
     parser.add_argument('--optimizer_meta', choices=['sgd', 'adadelta', 'adam'], default='adam',
                         help='Number of steps to run model')
