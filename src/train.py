@@ -38,9 +38,7 @@ class MetaOptimizer(nn.Module):
 
         h1, state = self.rnn(x, state)
 
-        means = self.fc1(h1)
-
-        out = means + torch.randn(x.shape) * torch.exp(self.log_stds)
+        out = self.fc1(h1)
 
         return out, state
 
