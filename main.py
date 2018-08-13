@@ -26,7 +26,7 @@ def parse_flags():
     parser.add_argument('--optimizer_kwargs_meta',
                         help='Comma separated kwargs for meta-model optimizer. Keys and values are separated by a colon. E.g. lr:0.01,alpha:0.2')
     parser.add_argument('--num_steps_model', default=50, type=int, help='Number of steps to run model.')
-    parser.add_argument('--num_steps_meta', default=300, type=int, help='Number of steps to run meta-model.')
+    parser.add_argument('--num_steps_meta', default=0, type=int, help='Number of steps to run meta-model.')
     parser.add_argument('--reset', action='store_true',
                         help='If set, delete the existing model directory and start training from scratch.')
     parser.add_argument('--supply_truth', action='store_true', help='Supply optimizer deltas to meta-optimizer.')
