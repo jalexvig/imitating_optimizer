@@ -14,7 +14,7 @@ def parse_flags():
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--model', default='mnist', choices=['binary', 'mnist'], help='Name of model.')
+    parser.add_argument('--model', default='binary', choices=['binary', 'mnist'], help='Name of model.')
     parser.add_argument('--model_dir', default='./saved', help='Directory to save run information in.')
     parser.add_argument('--seed', default=0, type=int, help='Random seed.')
     parser.add_argument('--optimizer_model', choices=['sgd', 'adadelta', 'adam'], default='sgd',
